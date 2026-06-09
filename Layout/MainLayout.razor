@@ -1,0 +1,84 @@
+@inherits LayoutComponentBase
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+@implements IDisposable
+
+<div x-data="{ page: '@_currentPage', loaded: true, darkMode: false, stickyMenu: false, sidebarToggle: false, scrollTop: false }"
+     x-init="tailAdminPageInit($data)"
+     :class="{'dark bg-gray-900': darkMode === true}"
+     class="text-base text-gray-800 dark:text-gray-400 bg-gray-50 dark:bg-gray-950 font-outfit min-h-screen">
+
+    <!-- ===== Preloader Start ===== -->
+    <div x-show="loaded"
+         class="fixed left-0 top-0 z-999999 flex h-screen w-screen items-center justify-center bg-white dark:bg-black">
+        <div class="h-16 w-16 animate-spin rounded-full border-4 border-solid border-brand-500 border-t-transparent"></div>
+    </div>
+    <!-- ===== Preloader End ===== -->
+
+    <!-- ===== Page Wrapper Start ===== -->
+    <div class="flex h-screen overflow-hidden">
+        <!-- ===== Sidebar Start ===== -->
+        <Sidebar CurrentPage="@_currentPage" />
+        <!-- ===== Sidebar End ===== -->
+
+        <!-- ===== Content Area Start ===== -->
+        <div class="relative flex flex-col flex-1 overflow-x-hidden overflow-y-auto">
+            <!-- Small Device Overlay Start -->
+            <div @click="sidebarToggle = false"
+                 :class="sidebarToggle ? 'block lg:hidden' : 'hidden'"
+                 class="fixed w-full h-screen z-9 bg-gray-900/50"></div>
+            <!-- Small Device Overlay End -->
+
+            <!-- ===== Header Start ===== -->
+            <Header />
+            <!-- ===== Header End ===== -->
+
+            <!-- ===== Main Content Start ===== -->
+            <main>
+                @Body
+            </main>
+            <!-- ===== Main Content End ===== -->
+        </div>
+        <!-- ===== Content Area End ===== -->
+    </div>
+    <!-- ===== Page Wrapper End ===== -->
+</div>
+
+@code {
+    private string _currentPage = "ecommerce";
+
+    protected override void OnInitialized()
+    {
+        Navigation.LocationChanged += OnLocationChanged;
+        UpdateCurrentPage(Navigation.Uri);
+    }
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        UpdateCurrentPage(e.Location);
+        StateHasChanged();
+    }
+
+    private void UpdateCurrentPage(string uri)
+    {
+        var relative = Navigation.ToBaseRelativePath(uri);
+        // Extract page name from route
+        var queryIndex = relative.IndexOf('?');
+        if (queryIndex >= 0)
+        {
+            relative = relative.Substring(0, queryIndex);
+        }
+        _currentPage = string.IsNullOrEmpty(relative) ? "ecommerce" : relative;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        // Re-initialize scripts (flatpickr, apexcharts, alpine etc)
+        await JS.InvokeVoidAsync("tailAdminBlazor.initializePage");
+    }
+
+    public void Dispose()
+    {
+        Navigation.LocationChanged -= OnLocationChanged;
+    }
+}
