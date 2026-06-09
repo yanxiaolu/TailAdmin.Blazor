@@ -14,11 +14,17 @@
 
 <body>
     <div id="app">
-        <svg class="loading-progress">
-            <circle r="40%" cx="50%" cy="50%" />
-            <circle r="40%" cx="50%" cy="50%" />
-        </svg>
-        <div class="loading-progress-text"></div>
+        <!-- Modern clean CSS loading spinner matching TailAdmin brand -->
+        <div style="position: fixed; left: 0; top: 0; z-index: 999999; display: flex; height: 100vh; width: 100vw; flex-direction: column; align-items: center; justify-content: center; background-color: #ffffff;">
+            <div style="box-sizing: border-box; width: 64px; height: 64px; border-radius: 50%; border: 4px solid #e5e7eb; border-top-color: #465fff; animation: spin 1s linear infinite;"></div>
+            <p style="margin-top: 16px; font-family: sans-serif; font-size: 14px; font-weight: 500; color: #4b5563;">Loading TailAdmin...</p>
+            <style>
+                @keyframes spin {
+                    0% { transform: rotate(0deg); }
+                    100% { transform: rotate(360deg); }
+                }
+            </style>
+        </div>
     </div>
 
     <div id="blazor-error-ui" style="display: none;">
